@@ -1,0 +1,43 @@
+import RPi.GPIO as GPIO
+import time
+GPIO.setwarnings(False)
+
+SPEED_SOUND = 34000
+MAX_DISTANCE = 15
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(16, GPIO.OUT)
+GPIO.setup(18, GPIO.IN)
+GPIO.setup(12, GPIO.OUT)
+led = GPIO.PWM(12, 100)
+pwm = 0
+
+def distance():
+    GPIO.output(16, GPIO.HIGH)
+    time.sleep(0.00001)
+    GPIO.output(16, GPIO.LOW)
+    
+    while GPIO.input(18) == 0:
+        startTime = time.time()
+        
+    while GPIO.input(18) == 1:
+        stopTime = time.time()
+    
+    timeElasped = stopTime - startTime
+    distance = (timeElasped * SPEED_SOUND)/2
+    
+    return distance
+
+try:
+    while True:
+        currentDistance = distance()
+        print(currentDistance)
+        led.start(pwm)
+        if currentDistance < MAX_DISTANCE and currentDistance > 0:
+            led.ChangeDutyCycle((15-currentDistance)*6.6)
+                    
+except KeyboardInterrupt:
+    print("User stopped the measurement")
+    GPIO.cleanup()
+    
+
